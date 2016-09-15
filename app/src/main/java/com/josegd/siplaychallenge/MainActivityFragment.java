@@ -26,7 +26,7 @@ public class MainActivityFragment extends Fragment {
 		super.onActivityCreated(savedInstanceState);
 		tvTeamName = (TextView) getActivity().findViewById(R.id.team_name);
 		api = new SIPlayAPIService();
-		api.loadTeamData(tvTeamName);
+		api.loadTeamData(tvTeamName, mRecyclerView);
 		mRecyclerView.setHasFixedSize(true);
 		mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), GRID_SPAN));
 		mRecyclerView.setAdapter(mAdapter);

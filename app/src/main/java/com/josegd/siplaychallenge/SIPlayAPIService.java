@@ -1,5 +1,7 @@
 package com.josegd.siplaychallenge;
 
+import android.graphics.Color;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
@@ -15,7 +17,6 @@ public class SIPlayAPIService {
 	public static final String BASE_URL = "http://iscoresports.com/bcl/challenge/";
 
 	private SIPlayEndpoints mEndpoints;
-	private View mCallingView;
 	private Team mResponseData;
 
 	public SIPlayAPIService() {
@@ -26,14 +27,15 @@ public class SIPlayAPIService {
 		mEndpoints = retrofit.create(SIPlayEndpoints.class);
 	}
 
-	public void loadTeamData(View callingView) {
-		mCallingView = callingView;
-		Call<Team> call = mEndpoints.getTeamName();
+	public void loadTeamData(final View teamNameView, final View teamGridView) {
+		Call<Team> call = mEndpoints.getTeamData();
 		call.enqueue(new Callback<Team>() {
 			@Override
 			public void onResponse(Call<Team> call, Response<Team> response) {
 				mResponseData = response.body();
-				((TextView) mCallingView).setText(mResponseData.getName());
+				((TextView) teamNameView).setText(mResponseData.getName());
+				int color = Color.parseColor("#" + mResponseData.getSettings().getHighlightColor());
+				teamGridView.setBackgroundColor(color);
 			}
 
 			@Override
@@ -46,7 +48,7 @@ public class SIPlayAPIService {
 	public interface SIPlayEndpoints {
 
 		@GET("team.json")
-	   Call<Team> getTeamName();
+	   Call<Team> getTeamData();
 
 	}
 
