@@ -9,21 +9,18 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
+import java.util.List;
+
 public class PlayersAdapter extends RecyclerView.Adapter<PlayersAdapter.ViewHolder> {
 
-	public static class ViewHolder extends RecyclerView.ViewHolder {
+	private Context mContext;
+	private List<Player> mPlayerList;
 
-		public ImageView playerPhoto;
-		public TextView playerName;
-		public TextView playerJersey;
-
-		public ViewHolder(View itemView) {
-			super(itemView);
-			playerPhoto  = (ImageView) itemView.findViewById(R.id.player_photo);
-         playerName   = (TextView) itemView.findViewById(R.id.player_name);
-			playerJersey = (TextView) itemView.findViewById(R.id.player_jersey);
-		}
-
+	public PlayersAdapter(Context context, List<Player> playerList) {
+		mContext = context;
+		mPlayerList = playerList;
 	}
 
 	@Override
@@ -37,12 +34,37 @@ public class PlayersAdapter extends RecyclerView.Adapter<PlayersAdapter.ViewHold
 
 	@Override
 	public void onBindViewHolder(PlayersAdapter.ViewHolder holder, int position) {
-		// Just show the default cell to start
+		if (mPlayerList != null) {
+			Player p = mPlayerList.get(position);
+			Picasso.with(mContext)
+					 .load(p.getPerson().getImageUrl())
+					 .into(holder.playerPhoto);
+			holder.playerFirstName.setText(p.getPerson().getFirstName());
+			holder.playerLastName.setText(p.getPerson().getLastName());
+			holder.playerJersey.setText(p.getJerseyNumber());
+		}
 	}
 
 	@Override
 	public int getItemCount() {
-		return 20;
+		return mPlayerList != null ? mPlayerList.size() : 0;
+	}
+
+	public static class ViewHolder extends RecyclerView.ViewHolder {
+
+		public ImageView playerPhoto;
+		public TextView playerFirstName;
+		public TextView playerLastName;
+		public TextView playerJersey;
+
+		public ViewHolder(View itemView) {
+			super(itemView);
+			playerPhoto  = (ImageView) itemView.findViewById(R.id.player_photo);
+			playerFirstName = (TextView) itemView.findViewById(R.id.player_fname);
+			playerLastName = (TextView) itemView.findViewById(R.id.player_lname);
+			playerJersey = (TextView) itemView.findViewById(R.id.player_jersey);
+		}
+
 	}
 
 }

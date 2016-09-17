@@ -9,6 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivityFragment extends Fragment {
 
 	private static final int GRID_SPAN = 3;
@@ -16,7 +19,6 @@ public class MainActivityFragment extends Fragment {
 	private SIPlayAPIService api;
 	private TextView tvTeamName;
 	private RecyclerView mRecyclerView;
-	private PlayersAdapter mAdapter = new PlayersAdapter();
 
 	public MainActivityFragment() {
 	}
@@ -25,12 +27,12 @@ public class MainActivityFragment extends Fragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		tvTeamName = (TextView) getActivity().findViewById(R.id.team_name);
-		api = new SIPlayAPIService();
-		api.loadTeamData(tvTeamName, mRecyclerView);
 		mRecyclerView.setHasFixedSize(true);
 		mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), GRID_SPAN));
-		mRecyclerView.setAdapter(mAdapter);
-
+		mRecyclerView.setAdapter(new PlayersAdapter(getActivity(), null));
+		api = new SIPlayAPIService();
+		api.loadTeamData(tvTeamName, mRecyclerView);
+		api.loadPlayers(getActivity(), mRecyclerView);
 	}
 
 	@Override

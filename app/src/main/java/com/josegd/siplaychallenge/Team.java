@@ -2,28 +2,30 @@ package com.josegd.siplaychallenge;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Team {
 
 	@SerializedName("Name")
 	private String name;
 
+	@SerializedName("Players")
+	private List<Player> players;
+
 	@SerializedName("Settings")
 	private TeamSettings settings;
-
-	public void setName(String name) {
-		this.name = name;
-	}
 
 	public String getName() {
 		return name;
 	}
 
-	public TeamSettings getSettings() {
-		return settings;
+	public List<Player> getPlayers() {
+		return players;
 	}
 
-	public void setSettings(TeamSettings settings) {
-		this.settings = settings;
+	public TeamSettings getSettings() {
+		return settings;
 	}
 
 }
