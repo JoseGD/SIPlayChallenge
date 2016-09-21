@@ -2,8 +2,8 @@ package com.josegd.siplaychallenge;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -18,11 +18,17 @@ public class SIPlayAPIService {
 
 	private static final String BASE_URL = "http://iscoresports.com/bcl/challenge/";
 	private static final String JSON_RESOURCE = "team.json";
-	private static final String TAG = "challenge";
+	private final static int SBAR_LENGTH = Snackbar.LENGTH_LONG;
+	//private static final String TAG = "challenge";
 
 	private SIPlayEndpoints mEndpoints;
 	private Team mTeamResponse;
 	private Context mContext;
+
+	private final String UNSUCCESSFUL_REQ;
+	private final String FAILED_REQ ;
+	private final String TEAM_STR;
+	private final String PLAYERS_STR;
 
 	public SIPlayAPIService(Context context) {
 		mContext = context;
@@ -31,6 +37,10 @@ public class SIPlayAPIService {
 				                     .addConverterFactory(GsonConverterFactory.create())
 				                     .build();
 		mEndpoints = retrofit.create(SIPlayEndpoints.class);
+		UNSUCCESSFUL_REQ = mContext.getString(R.string.unsuccessful_response);
+		FAILED_REQ = mContext.getString(R.string.failed_loading);
+		TEAM_STR = mContext.getString(R.string.team_data);
+		PLAYERS_STR = mContext.getString(R.string.players);
 	}
 
 	public void loadTeamData(final View teamNameTV, final View teamRosterRV) {
@@ -44,16 +54,16 @@ public class SIPlayAPIService {
 					int color = Color.parseColor("#" + mTeamResponse.getSettings().getHighlightColor());
 					teamRosterRV.setBackgroundColor(color);
 				} else {
-					Log.d(TAG, String.format(mContext.getString(R.string.unsuccessful_response),
-							                   mContext.getString(R.string.team_data), response.raw().code()));
+					Snackbar.make(teamNameTV, String.format(UNSUCCESSFUL_REQ, TEAM_STR, response.raw().code()), SBAR_LENGTH).show();
+					//Log.d(TAG, String.format(UNSUCCESSFUL_REQ, TEAM_STR, response.raw().code()));
 				}
 			}
 
 			@Override
 			public void onFailure(Call<Team> call, Throwable t) {
 				mTeamResponse = null;
-				Log.d(TAG, String.format(mContext.getString(R.string.failed_loading),
-						                   mContext.getString(R.string.team_data), t.getMessage()));
+				Snackbar.make(teamNameTV, String.format(FAILED_REQ, TEAM_STR, t.getMessage()), SBAR_LENGTH).show();
+				//Log.d(TAG, String.format(FAILED_REQ, TEAM_STR, t.getMessage()));
 			}
 		});
 	}
@@ -68,22 +78,24 @@ public class SIPlayAPIService {
 							                                 response.body().getTeamId(), clickL);
 					teamRosterRV.setAdapter(pa);
 				} else {
-					Log.d(TAG, String.format(mContext.getString(R.string.unsuccessful_response),
-							                   mContext.getString(R.string.players), response.raw().code()));
+					Snackbar.make(teamRosterRV, String.format(UNSUCCESSFUL_REQ, PLAYERS_STR, response.raw().code()), SBAR_LENGTH).show();
+					//Log.d(TAG, String.format(UNSUCCESSFUL_REQ, PLAYERS_STR, response.raw().code()));
 				}
 			}
 
 			@Override
 			public void onFailure(Call<Team> call, Throwable t) {
-				Log.d(TAG, String.format(mContext.getString(R.string.failed_loading),
-											    mContext.getString(R.string.players), t.getMessage()));
+				Snackbar.make(teamRosterRV, String.format(FAILED_REQ, PLAYERS_STR, t.getMessage()), SBAR_LENGTH).show();
+				//Log.d(TAG, String.format(FAILED_REQ, PLAYERS_STR, t.getMessage()));
 			}
 		});
 	}
 
 	public interface SIPlayEndpoints {
+
 		@GET(JSON_RESOURCE)
 	   Call<Team> getTeamData();
+
 	}
 
 }
