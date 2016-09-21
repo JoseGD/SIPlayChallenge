@@ -1,4 +1,10 @@
 <resources>
    <string name="app_name">SIPlayChallenge</string>
    <string name="action_settings">Settings</string>
+   <string name="unsuccessful_response">Unsuccessful response loading %1$s - HTTP error code %2$d</string>
+   <string name="failed_loading">Failed loading %1$s, error message -> %2$s</string>
+   <string name="team_data">team data</string>
+   <string name="players">list of players</string>
+   <string name="failed_accessing">Failed accessing HTTP resource, error message -> %s</string>
+   <string name="unsuccessful_response_2">Unsuccessful response accessing HTTP resource - HTTP error code %d</string>
 </resources>

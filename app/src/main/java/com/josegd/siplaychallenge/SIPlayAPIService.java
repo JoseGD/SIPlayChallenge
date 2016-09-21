@@ -6,9 +6,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -20,11 +17,15 @@ import retrofit2.http.GET;
 public class SIPlayAPIService {
 
 	private static final String BASE_URL = "http://iscoresports.com/bcl/challenge/";
+	private static final String JSON_RESOURCE = "team.json";
+	private static final String TAG = "challenge";
 
 	private SIPlayEndpoints mEndpoints;
 	private Team mTeamResponse;
+	private Context mContext;
 
-	public SIPlayAPIService() {
+	public SIPlayAPIService(Context context) {
+		mContext = context;
 		Retrofit retrofit = new Retrofit.Builder()
 				                     .baseUrl(BASE_URL)
 				                     .addConverterFactory(GsonConverterFactory.create())
@@ -43,43 +44,46 @@ public class SIPlayAPIService {
 					int color = Color.parseColor("#" + mTeamResponse.getSettings().getHighlightColor());
 					teamRosterRV.setBackgroundColor(color);
 				} else {
-					Log.d("challenge", "Unsuccessful response loading team data - HTTP error code " + response.raw().code());
+					Log.d(TAG, String.format(mContext.getString(R.string.unsuccessful_response),
+							                   mContext.getString(R.string.team_data), response.raw().code()));
 				}
 			}
 
 			@Override
 			public void onFailure(Call<Team> call, Throwable t) {
 				mTeamResponse = null;
-				Log.d("challenge", "Failed loading team data because " + t.getMessage());
+				Log.d(TAG, String.format(mContext.getString(R.string.failed_loading),
+						                   mContext.getString(R.string.team_data), t.getMessage()));
 			}
 		});
 	}
 
-	public void loadPlayers(final Context context, final RecyclerView teamRosterRV) {
+	public void loadPlayers(final RecyclerView teamRosterRV, final PlayersAdapter.ClickListener clickL) {
 		Call<Team> call = mEndpoints.getTeamData();
 		call.enqueue(new Callback<Team>() {
 			@Override
 			public void onResponse(Call<Team> call, Response<Team> response) {
 				if (response.isSuccessful()) {
-					PlayersAdapter pa = new PlayersAdapter(context, response.body().getPlayers());
+					PlayersAdapter pa = new PlayersAdapter(mContext, response.body().getPlayers(),
+							                                 response.body().getTeamId(), clickL);
 					teamRosterRV.setAdapter(pa);
 				} else {
-					Log.d("challenge", "Unsuccessful response loading players - HTTP error code " + response.raw().code());
+					Log.d(TAG, String.format(mContext.getString(R.string.unsuccessful_response),
+							                   mContext.getString(R.string.players), response.raw().code()));
 				}
 			}
 
 			@Override
 			public void onFailure(Call<Team> call, Throwable t) {
-				Log.d("challenge", "Failed loading players because " + t.getMessage());
+				Log.d(TAG, String.format(mContext.getString(R.string.failed_loading),
+											    mContext.getString(R.string.players), t.getMessage()));
 			}
 		});
 	}
 
 	public interface SIPlayEndpoints {
-
-		@GET("team.json")
+		@GET(JSON_RESOURCE)
 	   Call<Team> getTeamData();
-
 	}
 
 }

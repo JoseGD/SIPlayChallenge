@@ -1,7 +1,6 @@
 package com.josegd.siplaychallenge;
 
 import android.content.Context;
-import android.media.Image;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,10 +16,14 @@ public class PlayersAdapter extends RecyclerView.Adapter<PlayersAdapter.ViewHold
 
 	private Context mContext;
 	private List<Player> mPlayerList;
+	private int mTeamId;
+	private ClickListener mClickListener;
 
-	public PlayersAdapter(Context context, List<Player> playerList) {
+	public PlayersAdapter(Context context, List<Player> playerList, int teamId, ClickListener clickListener) {
 		mContext = context;
 		mPlayerList = playerList;
+		mTeamId = teamId;
+		mClickListener = clickListener;
 	}
 
 	@Override
@@ -42,20 +45,25 @@ public class PlayersAdapter extends RecyclerView.Adapter<PlayersAdapter.ViewHold
 			holder.playerFirstName.setText(p.getPerson().getFirstName());
 			holder.playerLastName.setText(p.getPerson().getLastName());
 			holder.playerJersey.setText(p.getJerseyNumber());
+			holder.setPlayerInHolder(p);
+			holder.setTeamIdInHolder(mTeamId);
 		}
 	}
 
 	@Override
 	public int getItemCount() {
-		return mPlayerList != null ? mPlayerList.size() : 0;
+		return mPlayerList != null ? mPlayerList.size() : 0   ;
 	}
 
-	public static class ViewHolder extends RecyclerView.ViewHolder {
+	public class ViewHolder extends RecyclerView.ViewHolder {
 
 		public ImageView playerPhoto;
 		public TextView playerFirstName;
 		public TextView playerLastName;
 		public TextView playerJersey;
+
+		Player player;
+		int teamId;
 
 		public ViewHolder(View itemView) {
 			super(itemView);
@@ -63,8 +71,28 @@ public class PlayersAdapter extends RecyclerView.Adapter<PlayersAdapter.ViewHold
 			playerFirstName = (TextView) itemView.findViewById(R.id.player_fname);
 			playerLastName = (TextView) itemView.findViewById(R.id.player_lname);
 			playerJersey = (TextView) itemView.findViewById(R.id.player_jersey);
+			itemView.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					if (mClickListener != null) {
+						mClickListener.onPlayerClick(player, teamId);
+					}
+				}
+			});
 		}
 
+		public void setPlayerInHolder(Player p) {
+			player = p;
+		}
+
+		public void setTeamIdInHolder(int id) {
+			teamId = id;
+		}
+
+	}
+
+	public interface ClickListener {
+		void onPlayerClick(Player player, int teamId);
 	}
 
 }

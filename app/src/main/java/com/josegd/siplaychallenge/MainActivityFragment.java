@@ -1,7 +1,8 @@
 package com.josegd.siplaychallenge;
 
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,10 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class MainActivityFragment extends Fragment {
+public class MainActivityFragment extends Fragment
+		                            implements PlayersAdapter.ClickListener,
+		                                       SIPlayHTTPClient.RequestResponseHandler {
 
 	private static final int GRID_SPAN = 3;
 
@@ -29,10 +29,10 @@ public class MainActivityFragment extends Fragment {
 		tvTeamName = (TextView) getActivity().findViewById(R.id.team_name);
 		mRecyclerView.setHasFixedSize(true);
 		mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), GRID_SPAN));
-		mRecyclerView.setAdapter(new PlayersAdapter(getActivity(), null));
-		api = new SIPlayAPIService();
+		mRecyclerView.setAdapter(new PlayersAdapter(getActivity(), null, 0, null));
+		api = new SIPlayAPIService(getActivity());
 		api.loadTeamData(tvTeamName, mRecyclerView);
-		api.loadPlayers(getActivity(), mRecyclerView);
+		api.loadPlayers(mRecyclerView, this);
 	}
 
 	@Override
@@ -40,6 +40,21 @@ public class MainActivityFragment extends Fragment {
 		final View view = inflater.inflate(R.layout.fragment_main, container, false);
 		mRecyclerView = (RecyclerView) view.findViewById(R.id.team_grid);
 		return view;
+	}
+
+	@Override
+	public void onPlayerClick(Player player, int teamId) {
+		new SIPlayHTTPClient().doTappedPlayerRequest(getActivity(), player, teamId, this);
+	}
+
+	@Override
+	public void onRequestResponseReceived(String msg) {
+		new AlertDialog.Builder(getActivity())
+				  .setTitle(R.string.app_name)
+				  .setMessage(msg)
+				  .setPositiveButton(android.R.string.ok, null)
+				  .create()
+				  .show();
 	}
 
 }
