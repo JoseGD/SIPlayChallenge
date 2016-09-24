@@ -1,6 +1,8 @@
 package com.josegd.siplaychallenge;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
@@ -10,15 +12,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.List;
+
 public class MainActivityFragment extends Fragment
 		                            implements PlayersAdapter.ClickListener,
 		                                       SIPlayHTTPClient.RequestResponseHandler {
 
 	private static final int GRID_SPAN = 3;
+	private final static int SBAR_LENGTH = Snackbar.LENGTH_LONG;
+
+	private TextView tvTeamName;
+	private RecyclerView rvPlayerRoster;
 
 	private SIPlayAPIService api;
-	private TextView tvTeamName;
-	private RecyclerView mRecyclerView;
+	private Presenter presenter;
+
+	private String UNSUCCESSFUL_REQ;
+	private String FAILED_REQ ;
+	private String TEAM_STR;
 
 	public MainActivityFragment() {
 	}
@@ -26,19 +37,16 @@ public class MainActivityFragment extends Fragment
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		tvTeamName = (TextView) getActivity().findViewById(R.id.team_name);
-		mRecyclerView.setHasFixedSize(true);
-		mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), GRID_SPAN));
-		mRecyclerView.setAdapter(new PlayersAdapter(getActivity(), null, 0, null));
-		api = new SIPlayAPIService(getActivity());
-		api.loadTeamData(tvTeamName, mRecyclerView);
-		api.loadPlayers(mRecyclerView, this);
+		setUpUIControls();
+		api = new SIPlayAPIService();
+		presenter = new Presenter(this, api);
+		presenter.loadTeamData();
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_main, container, false);
-		mRecyclerView = (RecyclerView) view.findViewById(R.id.team_grid);
+		rvPlayerRoster = (RecyclerView) view.findViewById(R.id.team_grid);
 		return view;
 	}
 
@@ -55,6 +63,37 @@ public class MainActivityFragment extends Fragment
 				  .setPositiveButton(android.R.string.ok, null)
 				  .create()
 				  .show();
+	}
+
+	protected void setTeamName(String name) {
+		tvTeamName.setText(name);
+	}
+
+	protected void setTeamColor(String colorStr) {
+		rvPlayerRoster.setBackgroundColor(Color.parseColor("#" + colorStr));
+	}
+
+	protected void setPlayerRoster(List<Player> roster, int teamId) {
+		PlayersAdapter pa = new PlayersAdapter(getActivity(), roster, teamId, this);
+		rvPlayerRoster.setAdapter(pa);
+	}
+
+	protected void showUnsuccessfulRequestError(int code) {
+		Snackbar.make(tvTeamName, String.format(UNSUCCESSFUL_REQ, TEAM_STR, code), SBAR_LENGTH).show();
+	}
+
+	protected void showFailedRequestError(String msg) {
+		Snackbar.make(tvTeamName, String.format(FAILED_REQ, TEAM_STR, msg), SBAR_LENGTH).show();
+	}
+
+	private void setUpUIControls() {
+		UNSUCCESSFUL_REQ = getString(R.string.unsuccessful_response);
+		FAILED_REQ = getString(R.string.failed_loading);
+		TEAM_STR = getString(R.string.team_data);
+		tvTeamName = (TextView) getActivity().findViewById(R.id.team_name);
+		rvPlayerRoster.setHasFixedSize(true);
+		rvPlayerRoster.setLayoutManager(new GridLayoutManager(getActivity(), GRID_SPAN));
+		rvPlayerRoster.setAdapter(new PlayersAdapter(getActivity(), null, 0, null));
 	}
 
 }

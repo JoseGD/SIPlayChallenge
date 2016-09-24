@@ -11,8 +11,4 @@ public class TeamSettings {
 		return highlightColor;
 	}
 
-	public void setHighlightColor(String highlightColor) {
-		this.highlightColor = highlightColor;
-	}
-
 }
