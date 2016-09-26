@@ -7,7 +7,8 @@ import retrofit2.http.GET;
 
 public class SIPlayAPIService {
 
-	private static final String BASE_URL = "http://iscoresports.com/bcl/challenge/";
+	public static final String BASE_URL = "http://iscoresports.com/bcl/challenge/";
+
 	private static final String JSON_RESOURCE = "team.json";
 
 	private SIPlayEndpoints mEndpoints;

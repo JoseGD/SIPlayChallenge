@@ -2,6 +2,8 @@ package com.josegd.siplaychallenge;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -15,8 +17,7 @@ import android.widget.TextView;
 import java.util.List;
 
 public class MainActivityFragment extends Fragment
-		                            implements PlayersAdapter.ClickListener,
-		                                       SIPlayHTTPClient.RequestResponseHandler {
+		                            implements PlayersAdapter.ClickListener {
 
 	private static final int GRID_SPAN = 3;
 	private final static int SBAR_LENGTH = Snackbar.LENGTH_LONG;
@@ -26,10 +27,6 @@ public class MainActivityFragment extends Fragment
 
 	private SIPlayAPIService api;
 	private Presenter presenter;
-
-	private String UNSUCCESSFUL_REQ;
-	private String FAILED_REQ ;
-	private String TEAM_STR;
 
 	public MainActivityFragment() {
 	}
@@ -52,18 +49,10 @@ public class MainActivityFragment extends Fragment
 
 	@Override
 	public void onPlayerClick(Player player, int teamId) {
-		new SIPlayHTTPClient().doTappedPlayerRequest(getActivity(), player, teamId, this);
+		presenter.showPlayerInfo(player, teamId);
 	}
 
-	@Override
-	public void onRequestResponseReceived(String msg) {
-		new AlertDialog.Builder(getActivity())
-				  .setTitle(R.string.app_name)
-				  .setMessage(msg)
-				  .setPositiveButton(android.R.string.ok, null)
-				  .create()
-				  .show();
-	}
+	// REST API actions -----------------------------------------------------------------------------
 
 	protected void setTeamName(String name) {
 		tvTeamName.setText(name);
@@ -78,22 +67,59 @@ public class MainActivityFragment extends Fragment
 		rvPlayerRoster.setAdapter(pa);
 	}
 
-	protected void showUnsuccessfulRequestError(int code) {
-		Snackbar.make(tvTeamName, String.format(UNSUCCESSFUL_REQ, TEAM_STR, code), SBAR_LENGTH).show();
+	protected void showUnsuccessfulAPIRequestError(int code) {
+		Snackbar.make(tvTeamName, String.format(getString(R.string.unsuccessful_response), code), SBAR_LENGTH).show();
 	}
 
-	protected void showFailedRequestError(String msg) {
-		Snackbar.make(tvTeamName, String.format(FAILED_REQ, TEAM_STR, msg), SBAR_LENGTH).show();
+	protected void showFailedAPIRequestError(String msg) {
+		Snackbar.make(tvTeamName, String.format(getString(R.string.failed_loading), msg), SBAR_LENGTH).show();
 	}
+
+	// Network call actions -------------------------------------------------------------------------
+
+	protected void showSuccessfulNetworkRequestResult(final String msg) {
+		new Handler(Looper.getMainLooper()).post(new Runnable() {
+			@Override
+			public void run() {
+				showNetworkRequestResultDialog(msg);
+			}
+		});
+	}
+
+	protected void showFailedNetworkRequestError(final String msg) {
+		new Handler(Looper.getMainLooper()).post(new Runnable() {
+			@Override
+			public void run() {
+				showNetworkRequestResultDialog(String.format(getString(R.string.failed_accessing), msg));
+			}
+		});
+	}
+
+	protected void showFailedNetworkRequestError(final int code) {
+		new Handler(Looper.getMainLooper()).post(new Runnable() {
+			@Override
+			public void run() {
+				showNetworkRequestResultDialog(String.format(getString(R.string.unsuccessful_response_2), code));
+			}
+		});
+	}
+
+	// ----------------------------------------------------------------------------------------------
 
 	private void setUpUIControls() {
-		UNSUCCESSFUL_REQ = getString(R.string.unsuccessful_response);
-		FAILED_REQ = getString(R.string.failed_loading);
-		TEAM_STR = getString(R.string.team_data);
 		tvTeamName = (TextView) getActivity().findViewById(R.id.team_name);
 		rvPlayerRoster.setHasFixedSize(true);
 		rvPlayerRoster.setLayoutManager(new GridLayoutManager(getActivity(), GRID_SPAN));
 		rvPlayerRoster.setAdapter(new PlayersAdapter(getActivity(), null, 0, null));
+	}
+
+	private void showNetworkRequestResultDialog(String msg) {
+		new AlertDialog.Builder(getActivity())
+				  .setTitle(R.string.app_name)
+				  .setMessage(msg)
+				  .setPositiveButton(android.R.string.ok, null)
+				  .create()
+				  .show();
 	}
 
 }
