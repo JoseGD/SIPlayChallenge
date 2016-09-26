@@ -19,11 +19,11 @@ public class PlayersAdapter extends RecyclerView.Adapter<PlayersAdapter.ViewHold
 	private int mTeamId;
 	private ClickListener mClickListener;
 
-	public PlayersAdapter(Context context, List<Player> playerList, int teamId, ClickListener clickListener) {
+	public PlayersAdapter(Context context, List<Player> playerList, int teamId, ClickListener clickListenerImpl) {
 		mContext = context;
 		mPlayerList = playerList;
 		mTeamId = teamId;
-		mClickListener = clickListener;
+		mClickListener = clickListenerImpl;
 	}
 
 	@Override
@@ -38,15 +38,15 @@ public class PlayersAdapter extends RecyclerView.Adapter<PlayersAdapter.ViewHold
 	@Override
 	public void onBindViewHolder(PlayersAdapter.ViewHolder holder, int position) {
 		if (mPlayerList != null) {
-			Player p = mPlayerList.get(position);
+			holder.player = mPlayerList.get(position);
+			holder.teamId = mTeamId;
+			Player p = holder.player;
 			Picasso.with(mContext)
 					 .load(p.getPerson().getImageUrl())
 					 .into(holder.playerPhoto);
 			holder.playerFirstName.setText(p.getPerson().getFirstName());
 			holder.playerLastName.setText(p.getPerson().getLastName());
 			holder.playerJersey.setText(p.getJerseyNumber());
-			holder.setPlayerInHolder(p);
-			holder.setTeamIdInHolder(mTeamId);
 		}
 	}
 
@@ -57,13 +57,13 @@ public class PlayersAdapter extends RecyclerView.Adapter<PlayersAdapter.ViewHold
 
 	public class ViewHolder extends RecyclerView.ViewHolder {
 
-		public ImageView playerPhoto;
-		public TextView playerFirstName;
-		public TextView playerLastName;
-		public TextView playerJersey;
-
 		Player player;
 		int teamId;
+
+		ImageView playerPhoto;
+		TextView playerFirstName;
+		TextView playerLastName;
+		TextView playerJersey;
 
 		public ViewHolder(View itemView) {
 			super(itemView);
@@ -79,14 +79,6 @@ public class PlayersAdapter extends RecyclerView.Adapter<PlayersAdapter.ViewHold
 					}
 				}
 			});
-		}
-
-		public void setPlayerInHolder(Player p) {
-			player = p;
-		}
-
-		public void setTeamIdInHolder(int id) {
-			teamId = id;
 		}
 
 	}
