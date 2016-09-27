@@ -7,11 +7,17 @@ import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import rx.Observable;
+import rx.Observer;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class Presenter {
 
 	private MainActivityFragment view;
 	private SIPlayAPIService apiService;
+	private Subscription subscription;
 
 	public Presenter(MainActivityFragment view, SIPlayAPIService apiService) {
 		this.view = view;
@@ -37,6 +43,31 @@ public class Presenter {
 				view.showFailedAPIRequestError(t.getMessage());
 			}
 		});
+	}
+
+	public void loadTeamDataRx() {
+		Observable<Team> observable = apiService.getEndpoints().getTeamDataRx();
+		subscription =
+			observable.subscribeOn(Schedulers.io())
+					    .observeOn(AndroidSchedulers.mainThread())
+					    .subscribe(new Observer<Team>() {
+						    @Override
+						    public void onCompleted() {
+
+						    }
+
+						    @Override
+						    public void onError(Throwable e) {
+							    view.showFailedAPIRequestError(e.getMessage());
+						    }
+
+						    @Override
+						    public void onNext(Team team) {
+							    view.setTeamName(team.getName());
+							    view.setTeamColor(team.getSettings().getHighlightColor());
+							    view.setPlayerRoster(team.getPlayers(), team.getTeamId());
+						    }
+					    });
 	}
 
 	public void showPlayerInfo(Player player, int teamId) {

@@ -37,7 +37,8 @@ public class MainActivityFragment extends Fragment
 		setUpUIControls();
 		api = new SIPlayAPIService();
 		presenter = new Presenter(this, api);
-		presenter.loadTeamData();
+		presenter.loadTeamDataRx();
+		//presenter.loadTeamData();
 	}
 
 	@Override
